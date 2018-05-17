@@ -1,0 +1,47 @@
+<h1>Наименования в магазине</h1>
+
+<ul class="test-list menu-v"></ul>
+<button class="test-next" type="button">Показать ещё&hellip;</button>
+<p class="test-loaded small"></p>
+<script type="text/javascript">
+	$(function() {
+		var offset = 0,
+			$list = $(".test-list"),
+			$next = $(".test-next"),
+			$loaded = $(".test-loaded"),
+			pluralForm = function(count, ending1, ending2, ending3){
+				var count100 = count%100,
+					count10 = count%10;
+				if(count100>=10 && count<=20) return ending3;
+				if(count10==1) return ending1;
+				if(count10>1 && count10<5) return ending2;
+				return ending3;
+			},
+			getItems = function () {
+				$next.attr("disabled", true);
+				$.get("", {
+					plugin: 'test',
+					action: 'items',
+					offset: offset
+				}, function (response) {
+					if (response.data.items) {
+						offset += response.data.items.length;
+						response.data.items.forEach(function (item) {
+							$('<li />').html(item.name).appendTo($list);
+						});
+						$loaded.html('Показано ' + offset + ' товар' + pluralForm(offset, '', 'а', 'ов') + ' из ' + response.data.total);
+						if (offset >= response.data.total) {
+							$next.hide();
+						} else {
+							$next.removeAttr("disabled");
+						}
+					} else {
+						$next.hide();
+					}
+				}, 'json');
+			};
+
+		$next.on("click", getItems);
+		getItems();
+	});
+</script>
